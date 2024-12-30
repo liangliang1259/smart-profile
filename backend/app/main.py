@@ -12,11 +12,11 @@ app = FastAPI(
 # 配置 CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3001", "http://localhost:3002", "http://localhost:3003", "http://localhost:3004"],
+    allow_origins=["*"],  # 在生产环境中应该设置具体的域名
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# 包含路由
-app.include_router(api_router, prefix="/api")
+# 包含路由，移除前缀以匹配前端的请求路径
+app.include_router(api_router)
