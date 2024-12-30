@@ -10,7 +10,7 @@ const api = axios.create({
 
 export const optimizeProfile = async (text) => {
   try {
-    const response = await api.post('/optimize', { text })
+    const response = await api.post('/ai/optimize', { text })
     return response.data
   } catch (error) {
     console.error('Error optimizing profile:', error)
@@ -20,7 +20,7 @@ export const optimizeProfile = async (text) => {
 
 export const importProfile = async (url) => {
   try {
-    const response = await api.post('/import', { url })
+    const response = await api.post('/ai/import', { url })
     return response.data
   } catch (error) {
     console.error('Error importing profile:', error)

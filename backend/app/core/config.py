@@ -6,8 +6,12 @@ class Settings(BaseSettings):
     VERSION: str = "1.0.0"
     DESCRIPTION: str = "A smart personal profile generator"
     
-    # Database settings
-    DATABASE_URL: str = "mysql+pymysql://root:password@localhost/smart_profile"
+    # API 配置
+    KIMI_API_KEY: str = ""  # 从环境变量获取
+    KIMI_API_BASE: str = "https://api.moonshot.cn/v1"
+    
+    # 数据库配置
+    DATABASE_URL: str = "sqlite:///./smart_profile.db"
     
     # Redis settings
     REDIS_HOST: str = "localhost"
@@ -18,10 +22,6 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
-    # Kimi AI API settings
-    KIMI_API_KEY: Optional[str] = None
-    KIMI_API_URL: Optional[str] = None
-
     class Config:
         env_file = ".env"
 
