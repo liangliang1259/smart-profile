@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>名片预览 - Smart Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</head>
+<body class="min-h-screen bg-gray-50">
+    <!-- 导航栏 -->
+    <nav class="fixed top-0 w-full bg-white shadow-sm z-50 h-12 flex items-center px-4">
+        <button onclick="history.back()" class="text-gray-600">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+        <h1 class="text-lg font-medium ml-4">预览名片</h1>
+    </nav>
+
+    <!-- 主要内容区域 -->
+    <div class="pt-16 pb-20 px-4 max-w-3xl mx-auto">
+        <!-- 预览区域 -->
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
+            <!-- 名片内容 -->
+            <div id="card-preview" class="relative">
+                <img src="https://ai-public.mastergo.com/ai/img_res/3b2b2012a1dd90d2936abb3bbd10b9bd.jpg" 
+                     class="w-full aspect-[1.91/1] object-cover" />
+                
+                <!-- 个人信息 -->
+                <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent flex items-center p-8 text-white">
+                    <div class="flex items-start">
+                        <img id="preview-avatar" src="https://ai-public.mastergo.com/ai/img_res/766ae7e3422e069abe169b013eb46649.jpg" 
+                             class="w-24 h-24 rounded-full object-cover border-4 border-white/30" />
+                        <div class="ml-6">
+                            <h2 id="preview-name" class="text-3xl font-bold mb-2">Fendy</h2>
+                            <div class="space-y-2 text-white/90">
+                                <div class="flex items-center">
+                                    <i class="fas fa-map-marker-alt w-5"></i>
+                                    <span id="preview-location">北京朝阳</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-briefcase w-5"></i>
+                                    <span id="preview-profession">汽车之家内容运营 / 私人订制旅行社老板</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-clock w-5"></i>
+                                    <span>从业 <span id="preview-years">8</span> 年</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 核心优势和技能标签 -->
+                <div class="p-6 space-y-6">
+                    <!-- 专业技能 -->
+                    <div>
+                        <h3 class="text-base font-medium mb-3">专业技能</h3>
+                        <div id="preview-tags" class="flex flex-wrap gap-2">
+                            <!-- 标签将通过 JavaScript 动态添加 -->
+                        </div>
+                    </div>
+
+                    <!-- 核心优势 -->
+                    <div>
+                        <h3 class="text-base font-medium mb-3 flex items-center">
+                            <i class="fas fa-star text-yellow-400 mr-2"></i>
+                            核心优势
+                        </h3>
+                        <div id="preview-advantages" class="space-y-3">
+                            <!-- 优势项将通过 JavaScript 动态添加 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 二维码区域 -->
+                <div class="absolute bottom-4 right-4 w-24 h-24 bg-white rounded-lg shadow-lg flex items-center justify-center">
+                    <img src="path_to_qr_code" alt="二维码" class="w-20 h-20" />
+                </div>
+            </div>
+        </div>
+
+        <!-- 分享选项 -->
+        <div class="space-y-4">
+            <!-- 保存图片 -->
+            <button id="download-card" 
+                    class="w-full py-3 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 transition-colors flex items-center justify-center">
+                <i class="fas fa-download mr-2"></i>
+                保存到相册
+            </button>
+
+            <!-- 分享到微信 -->
+            <button id="share-wechat" 
+                    class="w-full py-3 bg-white text-gray-700 rounded-xl font-medium border border-gray-200 hover:bg-gray-50 transition-colors flex items-center justify-center">
+                <i class="fab fa-weixin text-green-500 mr-2"></i>
+                分享到微信
+            </button>
+        </div>
+    </div>
+
+    <!-- 分享提示遮罩 -->
+    <div id="share-overlay" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50">
+        <div class="text-center text-white p-8">
+            <img src="path_to_share_arrow" alt="点击右上角分享" class="w-16 mx-auto mb-4 animate-bounce" />
+            <p class="text-lg">点击右上角 "..." <br/>选择"分享到朋友圈"</p>
+        </div>
+    </div>
+
+    <script type="module">
+        import ProfileCard from '../components/ProfileCard.js';
+
+        // 获取 URL 参数
+        const urlParams = new URLSearchParams(window.location.search);
+        const profileData = {
+            nickname: urlParams.get('name') || 'Fendy',
+            location: urlParams.get('location') || '北京朝阳',
+            profession: urlParams.get('profession') || '汽车之家内容运营 / 私人订制旅行社老板',
+            workYears: parseInt(urlParams.get('years')) || 8,
+            advantages: JSON.parse(urlParams.get('advantages')) || [
+                '拥有出境旅行社，专注俄罗斯及新加坡目的地接待，可承接旅游、商务、展会等多样化需求',
+                '8年互联网产品海外流量投放经验，覆盖社交、教育、工具、汽车等领域',
+                '深耕汽车行业资源，拥有丰富的汽车媒体渠道合作经验'
+            ],
+            tags: JSON.parse(urlParams.get('tags')) || [
+                '出境旅游', '俄罗斯地接', '新加坡游学', 
+                '海外营销', '流量投放', '汽车行业', 
+                'Google投放', 'Facebook投放'
+            ]
+        };
+
+        // 更新预览内容
+        document.getElementById('preview-name').textContent = profileData.nickname;
+        document.getElementById('preview-location').textContent = profileData.location;
+        document.getElementById('preview-profession').textContent = profileData.profession;
+        document.getElementById('preview-years').textContent = profileData.workYears;
+
+        // 渲染标签
+        const tagsContainer = document.getElementById('preview-tags');
+        tagsContainer.innerHTML = profileData.tags.map(tag => `
+            <div class="px-4 py-2 bg-gradient-to-r from-blue-50 to-blue-100 rounded-full text-sm text-blue-600">
+                ${tag}
+            </div>
+        `).join('');
+
+        // 渲染优势
+        const advantagesContainer = document.getElementById('preview-advantages');
+        advantagesContainer.innerHTML = profileData.advantages.map(advantage => `
+            <div class="flex items-start p-3 rounded-lg bg-blue-50">
+                <i class="fas fa-check-circle text-blue-500 mt-1"></i>
+                <p class="ml-3 text-sm text-gray-700">${advantage}</p>
+            </div>
+        `).join('');
+
+        // 下载名片
+        document.getElementById('download-card').addEventListener('click', async () => {
+            const cardPreview = document.getElementById('card-preview');
+            const canvas = await html2canvas(cardPreview);
+            const link = document.createElement('a');
+            link.download = 'my-profile-card.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+
+        // 分享到微信
+        document.getElementById('share-wechat').addEventListener('click', () => {
+            const overlay = document.getElementById('share-overlay');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+            
+            overlay.addEventListener('click', () => {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+            });
+        });
+    </script>
+
+    <style>
+        /* 隐藏滚动条 */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</body>
+</html>

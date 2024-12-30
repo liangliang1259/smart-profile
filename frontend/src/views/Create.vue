@@ -82,8 +82,9 @@
       </div>
 
       <!-- Step 3: Preview -->
-      <div v-if="activeStep === 2" class="step-content">
+      <div v-if="activeStep === 2" class="step-content preview-step">
         <div class="preview-container">
+          <!-- 预览卡片 -->
           <div class="preview-card" ref="previewCard">
             <component
               :is="currentTemplate"
@@ -92,9 +93,34 @@
               :height="450"
             />
           </div>
-          <div class="preview-actions">
-            <el-button type="primary" @click="generateAndSaveImage">生成图片</el-button>
-            <el-button type="success" @click="shareToWeChat">分享到微信</el-button>
+
+          <!-- 分享操作区 -->
+          <div class="share-actions">
+            <div class="qr-code-section">
+              <div class="qr-code">
+                <img :src="qrCodeUrl" alt="二维码" />
+              </div>
+              <p class="text-center text-gray-500 mt-2">扫码查看</p>
+            </div>
+            
+            <div class="action-buttons">
+              <el-button type="primary" size="large" class="action-button" @click="generateAndSaveImage">
+                <i class="el-icon-download"></i>
+                保存到相册
+              </el-button>
+              <el-button type="success" size="large" class="action-button" @click="shareToWeChat">
+                <i class="el-icon-share"></i>
+                分享到微信
+              </el-button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 微信分享引导遮罩 -->
+        <div v-if="showShareGuide" class="share-guide-overlay" @click="showShareGuide = false">
+          <div class="guide-content">
+            <img src="@/assets/share-arrow.png" alt="分享指引" class="guide-arrow" />
+            <p class="guide-text">点击右上角"..."<br/>选择"分享给朋友"</p>
           </div>
         </div>
       </div>
@@ -181,6 +207,9 @@ const currentTemplate = computed(() => {
   }
 })
 
+const showShareGuide = ref(false)
+const qrCodeUrl = ref('') // 这里需要设置实际的二维码图片URL
+
 const optimizeBio = async () => {
   try {
     ElMessage.info('正在优化简介...')
@@ -219,31 +248,17 @@ const importProfile = async () => {
 const generateAndSaveImage = async () => {
   try {
     ElMessage.info('正在生成图片...')
-    generatedImage = await generateImage(previewCard.value)
-    await downloadImage(generatedImage)
-    ElMessage.success('图片已保存到下载文件夹')
+    const image = await generateImage(previewCard.value)
+    await downloadImage(image, 'my-profile-card.png')
+    ElMessage.success('图片已保存到相册')
   } catch (error) {
-    ElMessage.error('生成图片失败，请重试')
+    ElMessage.error('图片生成失败，请重试')
     console.error(error)
   }
 }
 
-const shareToWeChat = async () => {
-  try {
-    if (!generatedImage) {
-      generatedImage = await generateImage(previewCard.value)
-    }
-    
-    const success = await copyToClipboard(generatedImage)
-    if (success) {
-      ElMessage.success('图片已复制到剪贴板，可直接粘贴到微信')
-    } else {
-      throw new Error('复制失败')
-    }
-  } catch (error) {
-    ElMessage.error('分享失败，请重试')
-    console.error(error)
-  }
+const shareToWeChat = () => {
+  showShareGuide.value = true
 }
 </script>
 
@@ -306,31 +321,109 @@ const shareToWeChat = async () => {
     }
   }
 
-  .preview-container {
+  .preview-step {
+    background: #f5f7fa;
+    min-height: calc(100vh - 200px);
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 20px;
+    justify-content: center;
+  }
 
-    .preview-card {
-      width: 100%;
-      max-width: 600px;
-      aspect-ratio: 16/9;
+  .preview-container {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+
+  .preview-card {
+    width: 100%;
+    aspect-ratio: 1.91/1;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .share-actions {
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid #eee;
+  }
+
+  .qr-code-section {
+    text-align: center;
+    
+    .qr-code {
+      width: 120px;
+      height: 120px;
+      padding: 8px;
       background: white;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border: 1px solid #eee;
       border-radius: 8px;
-    }
-
-    .preview-actions {
-      display: flex;
-      gap: 16px;
+      
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
     }
   }
 
-  .step-actions {
+  .action-buttons {
+    flex: 1;
     display: flex;
-    justify-content: space-between;
-    margin-top: 30px;
+    gap: 16px;
+    justify-content: flex-end;
+    
+    .action-button {
+      min-width: 160px;
+      height: 48px;
+      font-size: 16px;
+      
+      i {
+        margin-right: 8px;
+      }
+    }
+  }
+
+  .share-guide-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    
+    .guide-content {
+      text-align: center;
+      color: white;
+      
+      .guide-arrow {
+        width: 64px;
+        height: 64px;
+        margin-bottom: 16px;
+        animation: bounce 1s infinite;
+      }
+      
+      .guide-text {
+        font-size: 18px;
+        line-height: 1.6;
+      }
+    }
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
   }
 }
 </style>

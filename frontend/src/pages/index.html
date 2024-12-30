@@ -215,21 +215,22 @@
         };
 
         // 生成名片预览
-        document.getElementById('generate-card').addEventListener('click', async () => {
-            const previewModal = document.getElementById('preview-modal');
-            const cardPreview = document.getElementById('card-preview');
-            
-            // 更新名片数据
-            profileCard.updateData({
-                nickname: document.getElementById('profile-name').value,
-                location: document.getElementById('profile-location').value,
-                profession: document.getElementById('profile-profession').value
-            });
+        document.getElementById('generate-card').addEventListener('click', () => {
+            // 收集表单数据
+            const formData = {
+                name: document.getElementById('profile-name').value || 'Fendy',
+                location: document.getElementById('profile-location').value || '北京朝阳',
+                profession: document.getElementById('profile-profession').value,
+                years: document.getElementById('work-years').value,
+                advantages: JSON.stringify(profileCard.advantages),
+                tags: JSON.stringify(profileCard.tags)
+            };
 
-            // 显示预览
-            cardPreview.innerHTML = profileCard.generateHTML();
-            previewModal.classList.remove('hidden');
-            previewModal.classList.add('flex');
+            // 构建 URL 参数
+            const params = new URLSearchParams(formData);
+            
+            // 跳转到预览页面
+            window.location.href = `preview.html?${params.toString()}`;
         });
 
         // 关闭预览

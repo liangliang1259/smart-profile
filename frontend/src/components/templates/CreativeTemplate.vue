@@ -1,33 +1,60 @@
 <template>
-  <div class="creative-template" :style="containerStyle">
-    <div class="background-pattern"></div>
-    
-    <div class="content">
-      <div class="header">
-        <div class="name-title">
-          <h1>{{ data.name }}</h1>
-          <p class="title">{{ data.title }}</p>
-          <p class="company">{{ data.company }}</p>
+  <div class="creative-template bg-white rounded-xl shadow-sm" :style="containerStyle">
+    <!-- 个人信息卡片 -->
+    <div class="p-6 mb-4">
+      <div class="flex items-start mb-6">
+        <div class="relative w-20 h-20">
+          <img :src="data.avatar || 'https://ai-public.mastergo.com/ai/img_res/766ae7e3422e069abe169b013eb46649.jpg'" 
+               class="w-full h-full rounded-full object-cover shadow-md" />
+        </div>
+        <div class="ml-4 flex-1">
+          <h1 class="text-xl font-medium mb-1">{{ data.name }}</h1>
+          <div class="flex items-center text-sm text-gray-600">
+            <i class="fas fa-map-marker-alt mr-1"></i>
+            <span>{{ data.location }}</span>
+          </div>
         </div>
       </div>
-      
-      <div class="main-content">
-        <div class="bio-section">
-          <h2>About Me</h2>
-          <p>{{ data.bio }}</p>
+
+      <div class="space-y-4">
+        <div class="flex items-center">
+          <i class="fas fa-briefcase text-blue-500 w-6"></i>
+          <span class="flex-1 text-sm">{{ data.title }}</span>
         </div>
         
-        <div class="skills-section">
-          <h2>Skills</h2>
-          <div class="skill-bubbles">
-            <div
-              v-for="skill in data.skills"
-              :key="skill"
-              class="skill-bubble"
-            >
-              {{ skill }}
-            </div>
-          </div>
+        <div class="flex items-center">
+          <i class="fas fa-clock text-blue-500 w-6"></i>
+          <span class="text-sm text-gray-600">从业年限</span>
+          <span class="w-16 text-center text-sm text-gray-600">{{ data.years }}</span>
+          <span class="text-sm text-gray-600">年</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 技能标签 -->
+    <div class="p-6 mb-4 border-t border-gray-100">
+      <div class="flex items-center mb-4">
+        <h3 class="text-base font-medium">专业技能</h3>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <div v-for="skill in data.skills" :key="skill"
+             class="px-4 py-2 bg-gradient-to-r from-blue-50 to-blue-100 rounded-full text-sm text-blue-600">
+          {{ skill }}
+        </div>
+      </div>
+    </div>
+
+    <!-- 核心优势 -->
+    <div class="p-6 border-t border-gray-100">
+      <h3 class="text-base font-medium mb-4 flex items-center">
+        <i class="fas fa-star text-yellow-400 mr-2"></i>
+        核心优势
+      </h3>
+      <div class="space-y-3">
+        <div v-for="(advantage, index) in data.advantages" :key="index"
+             class="flex items-start p-3 rounded-lg bg-blue-50">
+          <i class="fas fa-check-circle text-blue-500 mt-1"></i>
+          <p class="ml-3 text-sm text-gray-700 flex-1">{{ advantage }}</p>
         </div>
       </div>
     </div>
@@ -40,7 +67,17 @@ import { computed } from 'vue'
 const props = defineProps({
   data: {
     type: Object,
-    required: true
+    required: true,
+    default: () => ({
+      name: '',
+      location: '',
+      title: '',
+      company: '',
+      years: 0,
+      avatar: '',
+      skills: [],
+      advantages: []
+    })
   },
   width: {
     type: Number,
@@ -62,92 +99,11 @@ const containerStyle = computed(() => ({
 .creative-template {
   position: relative;
   overflow: hidden;
-  background: #2c3e50;
-  border-radius: 12px;
-  color: white;
-  
-  .background-pattern {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(64, 158, 255, 0.1) 0%, rgba(54, 209, 220, 0.1) 100%);
-    clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
-  }
-  
-  .content {
-    position: relative;
-    z-index: 1;
-    padding: 40px;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .header {
-    margin-bottom: 40px;
-    
-    h1 {
-      font-size: 48px;
-      font-weight: 800;
-      margin-bottom: 8px;
-      background: linear-gradient(135deg, #409EFF 0%, #36D1DC 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    
-    .title {
-      font-size: 24px;
-      color: #409EFF;
-      margin-bottom: 4px;
-    }
-    
-    .company {
-      font-size: 18px;
-      color: rgba(255, 255, 255, 0.7);
-    }
-  }
-  
-  .main-content {
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    gap: 40px;
-    
-    h2 {
-      font-size: 24px;
-      margin-bottom: 20px;
-      color: #409EFF;
-    }
-    
-    .bio-section {
-      p {
-        font-size: 16px;
-        line-height: 1.6;
-        color: rgba(255, 255, 255, 0.9);
-      }
-    }
-    
-    .skill-bubbles {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      
-      .skill-bubble {
-        background: rgba(64, 158, 255, 0.2);
-        padding: 8px 16px;
-        border-radius: 20px;
-        font-size: 14px;
-        color: #409EFF;
-        border: 1px solid rgba(64, 158, 255, 0.3);
-        transition: all 0.3s ease;
-        
-        &:hover {
-          background: rgba(64, 158, 255, 0.3);
-          transform: translateY(-2px);
-        }
-      }
-    }
-  }
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* 隐藏滚动条 */
+::-webkit-scrollbar {
+  display: none;
 }
 </style>
