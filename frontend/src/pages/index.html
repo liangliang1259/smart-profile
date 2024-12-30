@@ -49,12 +49,23 @@
                 <div class="flex items-center">
                     <i class="fas fa-clock text-blue-500 w-6"></i>
                     <span class="text-sm text-gray-600">从业年限</span>
-                    <div class="flex-1 mx-3">
-                        <input type="range" id="work-years" min="0" max="20" value="8" 
-                               class="w-full accent-blue-500" />
-                    </div>
-                    <span class="text-sm text-gray-600"><span id="years-value">8</span>年</span>
+                    <input type="number" id="work-years" value="8" min="0" max="50"
+                           class="w-16 text-center border-none bg-transparent text-sm text-gray-600 focus:outline-none" />
+                    <span class="text-sm text-gray-600">年</span>
                 </div>
+            </div>
+        </div>
+
+        <!-- 技能标签 -->
+        <div class="bg-white rounded-xl shadow-sm p-6 mb-4">
+            <div class="flex items-center mb-4">
+                <h3 class="text-base font-medium">专业技能</h3>
+                <button id="add-tag" class="ml-auto text-blue-500">
+                    <i class="fas fa-plus-circle text-lg"></i>
+                </button>
+            </div>
+            <div id="tags-container" class="flex flex-wrap gap-2">
+                <!-- 标签会通过 JavaScript 动态添加 -->
             </div>
         </div>
 
@@ -70,19 +81,6 @@
             <button id="add-advantage" class="mt-4 text-blue-500 text-sm hover:text-blue-600">
                 <i class="fas fa-plus-circle mr-1"></i>添加优势
             </button>
-        </div>
-
-        <!-- 技能标签 -->
-        <div class="bg-white rounded-xl shadow-sm p-6 mb-4">
-            <div class="flex items-center mb-4">
-                <h3 class="text-base font-medium">专业技能</h3>
-                <button id="add-tag" class="ml-auto text-blue-500">
-                    <i class="fas fa-plus-circle text-lg"></i>
-                </button>
-            </div>
-            <div id="tags-container" class="flex flex-wrap gap-2">
-                <!-- 标签会通过 JavaScript 动态添加 -->
-            </div>
         </div>
 
         <!-- 名片样式 -->
@@ -150,13 +148,11 @@
         
         // 初始化表单数据
         const workYearsInput = document.getElementById('work-years');
-        const yearsValue = document.getElementById('years-value');
         const advantagesContainer = document.getElementById('advantages-container');
         const tagsContainer = document.getElementById('tags-container');
 
-        // 更新工作年限显示
+        // 更新工作年限
         workYearsInput.addEventListener('input', (e) => {
-            yearsValue.textContent = e.target.value;
             profileCard.workYears = parseInt(e.target.value);
         });
 
@@ -259,24 +255,6 @@
     </script>
 
     <style>
-        /* 自定义滑块样式 */
-        input[type="range"] {
-            -webkit-appearance: none;
-            height: 4px;
-            background: #e2e8f0;
-            border-radius: 2px;
-            outline: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            background: #3b82f6;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-
         /* 隐藏滚动条 */
         ::-webkit-scrollbar {
             display: none;
