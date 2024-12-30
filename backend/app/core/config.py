@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     REDIS_PORT: int = 6379
     
     # JWT settings
-    SECRET_KEY: str = "your-secret-key"
+    SECRET_KEY: str = "sk-h8Gv3GmkEEXblUcJn3qowM6TtgNGDKnmYq4R0ki2qGSMGmP6"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     

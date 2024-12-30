@@ -1,20 +1,28 @@
 import httpx
+import logging
 from app.core.config import settings
 from typing import Dict, Any
 
+# 配置日志
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 class AIService:
     def __init__(self):
-        self.api_key = settings.KIMI_API_KEY
-        self.api_base = settings.KIMI_API_BASE
+        self.api_key = "sk-h8Gv3GmkEEXblUcJn3qowM6TtgNGDKnmYq4R0ki2qGSMGmP6"
+        self.api_base = "https://api.moonshot.cn/v1"
         self.headers = {
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
         }
+        logger.info("AIService initialized with API base: %s", self.api_base)
     
     async def optimize_profile(self, text: str) -> str:
         """
         使用 Kimi API 优化个人简介
         """
+        logger.info("Starting profile optimization for text length: %d", len(text))
+        
         messages = [
             {
                 "role": "system",
@@ -27,83 +35,104 @@ class AIService:
         ]
         
         try:
+            logger.info("Preparing to send request to Kimi API")
+            request_data = {
+                "model": "moonshot-v1-8k",
+                "messages": messages,
+                "temperature": 0.7,
+                "max_tokens": 800
+            }
+            logger.info("Request data: %s", request_data)
+            
             async with httpx.AsyncClient() as client:
+                logger.info("Sending request to Kimi API")
                 response = await client.post(
                     f"{self.api_base}/chat/completions",
                     headers=self.headers,
-                    json={
-                        "model": "moonshot-v1-8k",
-                        "messages": messages,
-                        "temperature": 0.7,
-                        "max_tokens": 800
-                    },
+                    json=request_data,
                     timeout=30.0
                 )
                 
+                logger.info("Received response from Kimi API with status code: %d", response.status_code)
                 response.raise_for_status()
                 result = response.json()
+                logger.info("Raw API response: %s", result)
                 
                 if "choices" in result and len(result["choices"]) > 0:
-                    return result["choices"][0]["message"]["content"]
+                    optimized_text = result["choices"][0]["message"]["content"]
+                    logger.info("Successfully optimized profile text")
+                    return optimized_text
                 else:
+                    logger.error("No valid choices in API response")
                     raise ValueError("No valid response from AI service")
                     
+        except httpx.TimeoutException as e:
+            logger.error("Timeout error calling Kimi API: %s", str(e))
+            raise Exception(f"Request to Kimi API timed out: {str(e)}")
+        except httpx.HTTPStatusError as e:
+            logger.error("HTTP error from Kimi API: %s", str(e))
+            raise Exception(f"HTTP error from Kimi API: {str(e)}")
         except Exception as e:
-            print(f"Error calling Kimi API: {str(e)}")
-            raise
+            logger.error("Unexpected error calling Kimi API: %s", str(e), exc_info=True)
+            raise Exception(f"Error calling Kimi API: {str(e)}")
     
     async def analyze_profile(self, url: str) -> Dict[str, Any]:
         """
-        分析个人主页链接并提取关键信息
+        从链接中分析并提取个人信息
         """
+        logger.info("Starting profile analysis for URL: %s", url)
+        
         messages = [
             {
                 "role": "system",
-                "content": "你是一个专业的个人信息分析助手。你需要分析用户提供的个人主页链接，并提取关键信息。请以JSON格式返回以下字段：name（姓名）, title（职位）, company（公司）, bio（简介）, skills（技能列表）"
+                "content": "你是一个专业的个人信息分析助手。你需要从提供的链接中提取和分析个人信息，并以结构化的方式返回。"
             },
             {
                 "role": "user",
-                "content": f"请分析这个个人主页链接并提取关键信息：{url}"
+                "content": f"请分析这个链接中的个人信息：{url}"
             }
         ]
         
         try:
+            logger.info("Preparing to send request to Kimi API for URL analysis")
+            request_data = {
+                "model": "moonshot-v1-8k",
+                "messages": messages,
+                "temperature": 0.7,
+                "max_tokens": 800
+            }
+            logger.info("Request data: %s", request_data)
+            
             async with httpx.AsyncClient() as client:
+                logger.info("Sending request to Kimi API")
                 response = await client.post(
                     f"{self.api_base}/chat/completions",
                     headers=self.headers,
-                    json={
-                        "model": "moonshot-v1-8k",
-                        "messages": messages,
-                        "temperature": 0.3,
-                        "max_tokens": 1000
-                    },
+                    json=request_data,
                     timeout=30.0
                 )
                 
+                logger.info("Received response from Kimi API with status code: %d", response.status_code)
                 response.raise_for_status()
                 result = response.json()
+                logger.info("Raw API response: %s", result)
                 
                 if "choices" in result and len(result["choices"]) > 0:
-                    # 解析AI返回的JSON字符串
-                    import json
-                    content = result["choices"][0]["message"]["content"]
-                    try:
-                        return json.loads(content)
-                    except:
-                        # 如果JSON解析失败，返回空值
-                        return {
-                            "name": "",
-                            "title": "",
-                            "company": "",
-                            "bio": "",
-                            "skills": []
-                        }
+                    profile_data = result["choices"][0]["message"]["content"]
+                    logger.info("Successfully analyzed profile URL")
+                    return {"profile_data": profile_data}
                 else:
+                    logger.error("No valid choices in API response")
                     raise ValueError("No valid response from AI service")
                     
+        except httpx.TimeoutException as e:
+            logger.error("Timeout error calling Kimi API: %s", str(e))
+            raise Exception(f"Request to Kimi API timed out: {str(e)}")
+        except httpx.HTTPStatusError as e:
+            logger.error("HTTP error from Kimi API: %s", str(e))
+            raise Exception(f"HTTP error from Kimi API: {str(e)}")
         except Exception as e:
-            print(f"Error calling Kimi API: {str(e)}")
-            raise
+            logger.error("Unexpected error calling Kimi API: %s", str(e), exc_info=True)
+            raise Exception(f"Error calling Kimi API: {str(e)}")
 
 ai_service = AIService()

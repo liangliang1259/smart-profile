@@ -28,26 +28,9 @@ export const importProfile = async (url) => {
   }
 }
 
-// 添加请求拦截器
-api.interceptors.request.use(
-  (config) => {
-    // 在发送请求之前做些什么
-    const token = localStorage.getItem('token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
-    return config
-  },
-  (error) => {
-    return Promise.reject(error)
-  }
-)
-
 // 添加响应拦截器
 api.interceptors.response.use(
-  (response) => {
-    return response
-  },
+  (response) => response,
   (error) => {
     if (error.response) {
       console.error('Response error:', error.response.data)
